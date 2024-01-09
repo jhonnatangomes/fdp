@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="index.css" rel="stylesheet"/>
     <script src="htmx.1.9.10.min.js"></script>
+    <script src="htmx.1.9.10.ws.js"></script>
   </head>
   <body>
-    <div class="w-full h-screen flex flex-col justify-center items-center gap-y-4">
-      <p>Digite seu nome</p> 
-      <input class="border border-solid border-gray-300" placeholder="Nome"/>
-      <button class="bg-gray-200 rounded p-2">Registrar</button>
+    <div hx-ext="ws" ws-connect="/game">
+      <form id="game-form" class="w-full h-screen flex flex-col justify-center items-center gap-y-4" ws-send>
+        <label for="player_name">Digite seu nome</label> 
+        <input id="player_name" class="border border-solid border-gray-300" placeholder="Nome" name="data"/>
+        <input type="hidden" name="type" value="join"/>
+        <button class="bg-gray-200 rounded p-2" type="submit">Registrar</button>
+      </form>
     </div> 
   </body>
 </html>

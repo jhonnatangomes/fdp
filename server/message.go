@@ -1,41 +1,36 @@
 package server
 
 import (
-	"encoding/json"
-	"fmt"
+	"html/template"
 )
 
 type Message struct {
 	MessageType MessageType `json:"type"`
-	Player      *Player     `json:"player"`
 	Data        string      `json:"data"`
 }
 
-type MessageType int
+type MessageType string
 
 const (
-	Join MessageType = iota
+	Join MessageType = "join"
 )
 
-func decodeMessage(message []byte) (*Message, error) {
-	var decodedMessage Message
-	if err := json.Unmarshal(message, &decodedMessage); err != nil {
-		return nil, err
-	}
-	return &decodedMessage, nil
-}
-
-var joinedPlayers int
-
-func (m Message) calculateResponse() *Message {
+func (m Message) calculateResponse(hub *Hub) *template.Template {
 	switch m.MessageType {
 	case Join:
-		joinedPlayers++
-		return &Message{
-			MessageType: Join,
-			Data:        fmt.Sprintf("Joined players: %d", joinedPlayers),
-			Player:      m.Player,
+		if hub.game == nil {
+			hub.game = newGame()
 		}
+		hub.game.addPlayer(m.Data)
+		data, err := hub.templates.ReadFile("templates/player_joined.html")
+		if err != nil {
+			return nil
+		}
+		templ, err := template.New("player_joined").Parse(string(data))
+		if err != nil {
+			return nil
+		}
+		return templ
 	}
 	return nil
 }

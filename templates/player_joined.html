@@ -1,0 +1,8 @@
+<form id="game-form" class="w-full h-screen flex flex-col justify-center items-center gap-y-4" ws-send>
+  {{if eq (len .Players) 1}}
+    <span>{{len .Players}} jogador registrado</span>
+  {{else}}
+    <span>{{len .Players}} jogadores registrados</span>
+  {{end}}
+  <button class="bg-gray-200 rounded p-2" type="submit">Iniciar Jogo</button>
+</form>

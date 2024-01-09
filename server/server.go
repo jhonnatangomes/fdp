@@ -2,7 +2,7 @@ package server
 
 import (
 	"embed"
-	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
 	"strings"
@@ -36,37 +36,20 @@ func ServeFile(assets embed.FS, filePath string) func(w http.ResponseWriter, r *
 	}
 }
 
-func WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	defer conn.Close()
-	readLoop(conn)
-}
-
-func readLoop(conn *websocket.Conn) {
-	for {
-		messageType, messageSlice, err := conn.ReadMessage()
+func WebSocketHandler(hub *Hub) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		message, err := decodeMessage(messageSlice)
-		if err != nil {
-			log.Println(err)
-			return
+		client := &Client{
+			hub:  hub,
+			conn: conn,
+			send: make(chan *template.Template),
 		}
-		responseMessage := message.calculateResponse()
-		response, err := json.Marshal(responseMessage)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		if err = conn.WriteMessage(messageType, response); err != nil {
-			log.Println(err)
-			return
-		}
+		client.hub.register <- client
+		go client.writePump()
+		go client.readPump()
 	}
 }

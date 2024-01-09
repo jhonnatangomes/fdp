@@ -1,7 +1,7 @@
 {
   "name": "fdp",
   "scripts": {
-    "dev": "concurrently \"npx tailwindcss -i ./assets/input.css -o ./assets/index.css --watch\" \"live-server\""
+    "dev": "concurrently \"npx tailwindcss -i ./assets/input.css -o ./assets/index.css --watch\" \"live-server --mount=/:assets --port=3000\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
